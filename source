@@ -13,7 +13,7 @@ Sub CompareNamesAcrossWorkbooks()
     Set wb2 = Workbooks("users_9_19_2025 12_28_44 PM from O365.xlsx")
     On Error GoTo 0
 
-    ' Check if workbooks were found
+    ' Check if workbooks were found. Huge problem before cuz of onedrive i think :D
     If wb1 Is Nothing Then
         MsgBox "Workbook 'Mels Verizon Report 91925.xlsx' not found. Make sure it's open.", vbCritical
         Exit Sub
@@ -24,7 +24,7 @@ Sub CompareNamesAcrossWorkbooks()
         Exit Sub
     End If
 
-    ' Use first sheets
+    ' Use first sheets in workbook. This would probably be easier if both sheets were in the same workbook.
     On Error Resume Next
     Set ws1 = wb1.Sheets(1)
     Set ws2 = wb2.Sheets(1)
@@ -39,12 +39,12 @@ Sub CompareNamesAcrossWorkbooks()
     lastRow1 = ws1.Cells(ws1.Rows.Count, "B").End(xlUp).Row
     lastRow2 = ws2.Cells(ws2.Rows.Count, "E").End(xlUp).Row
 
-    ' Loop through names in wb1
+    ' Loop through names in wb1 but the row of names starts at 2 so we starting at 2 instead of 1
     For i = 2 To lastRow1
         lastName1 = Trim(LCase(ws1.Cells(i, "B").Value))
         firstName1 = Trim(LCase(ws1.Cells(i, "C").Value))
 
-        ' Keep only first word of first name (ignore middle initials)
+        ' Keep only first word of first name (ignore middle initials or any name after a space like ann in Mary ann)
         If InStr(firstName1, " ") > 0 Then
             firstName1 = Left(firstName1, InStr(firstName1, " ") - 1)
         End If
@@ -77,6 +77,6 @@ Sub CompareNamesAcrossWorkbooks()
         End If
     Next i
 
-    MsgBox "Comparison complete!"
+    MsgBox "Comparison complete! check row D in first workbook Sorry about overwriting your row D"
 
 End Sub
