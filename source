@@ -1,0 +1,82 @@
+Sub CompareNamesAcrossWorkbooks()
+    Dim wb1 As Workbook, wb2 As Workbook
+    Dim ws1 As Worksheet, ws2 As Worksheet
+    Dim lastRow1 As Long, lastRow2 As Long
+    Dim i As Long, j As Long
+    Dim firstName1 As String, lastName1 As String
+    Dim firstName2 As String, lastName2 As String
+    Dim matchFound As Boolean
+
+    ' Try to grab the workbooks
+    On Error Resume Next
+    Set wb1 = Workbooks("Mels Verizon Report 91925.xlsx")
+    Set wb2 = Workbooks("users_9_19_2025 12_28_44 PM from O365.xlsx")
+    On Error GoTo 0
+
+    ' Check if workbooks were found
+    If wb1 Is Nothing Then
+        MsgBox "Workbook 'Mels Verizon Report 91925.xlsx' not found. Make sure it's open.", vbCritical
+        Exit Sub
+    End If
+
+    If wb2 Is Nothing Then
+        MsgBox "Workbook 'users_9_19_2025 12_28_44 PM from O365.xlsx' not found. Make sure it's open.", vbCritical
+        Exit Sub
+    End If
+
+    ' Use first sheets
+    On Error Resume Next
+    Set ws1 = wb1.Sheets(1)
+    Set ws2 = wb2.Sheets(1)
+    On Error GoTo 0
+
+    If ws1 Is Nothing Or ws2 Is Nothing Then
+        MsgBox "One of the worksheets could not be found.", vbCritical
+        Exit Sub
+    End If
+
+    ' Find last rows
+    lastRow1 = ws1.Cells(ws1.Rows.Count, "B").End(xlUp).Row
+    lastRow2 = ws2.Cells(ws2.Rows.Count, "E").End(xlUp).Row
+
+    ' Loop through names in wb1
+    For i = 2 To lastRow1
+        lastName1 = Trim(LCase(ws1.Cells(i, "B").Value))
+        firstName1 = Trim(LCase(ws1.Cells(i, "C").Value))
+
+        ' Keep only first word of first name (ignore middle initials)
+        If InStr(firstName1, " ") > 0 Then
+            firstName1 = Left(firstName1, InStr(firstName1, " ") - 1)
+        End If
+
+        matchFound = False
+
+        ' Loop through names in wb2
+        For j = 2 To lastRow2
+            lastName2 = Trim(LCase(ws2.Cells(j, "E").Value))
+            firstName2 = Trim(LCase(ws2.Cells(j, "D").Value))
+
+            ' Keep only first word of first name
+            If InStr(firstName2, " ") > 0 Then
+                firstName2 = Left(firstName2, InStr(firstName2, " ") - 1)
+            End If
+
+            ' Compare
+            If lastName1 = lastName2 Then
+                If firstName1 = firstName2 Then
+                    ws1.Cells(i, "D").Value = "Match"
+                    matchFound = True
+                    Exit For
+                End If
+            End If
+        Next j
+
+        ' No match found
+        If Not matchFound Then
+            ws1.Cells(i, "D").Value = "No Match"
+        End If
+    Next i
+
+    MsgBox "Comparison complete!"
+
+End Sub
